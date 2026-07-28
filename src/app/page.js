@@ -46,6 +46,21 @@ export default function About() {
                 ↳
               </span>
               <span className="text-stone-600 dark:text-stone-400">
+                built a{" "}
+                <Link
+                  href="https://polymarket-activity-checker-navy.vercel.app/"
+                  className="font-medium"
+                >
+                  Polymarket activity checker
+                </Link>{" "}
+                for wallet volume, pnl, and trades
+              </span>
+            </li>
+            <li className="relative flex items-start gap-4 group/item">
+              <span className="absolute left-[-20px] top-0 text-stone-500 dark:text-stone-500">
+                ↳
+              </span>
+              <span className="text-stone-600 dark:text-stone-400">
                 built an{" "}
                 <Link
                   href="https://gamify-ai-learn.vercel.app/"

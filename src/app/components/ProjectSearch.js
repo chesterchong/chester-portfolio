@@ -3,10 +3,22 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import ProjectList from "./ProjectList";
+import PolymarketActivityCheckerImage from "@/app/assets/projects/polymarket-activity-checker.png";
 
 // For each project, drop a screenshot in src/app/assets/projects/ (webp,
 // imported as `image`) or a demo video in public/videos/ (`videoSrc`).
 const projects = [
+  {
+    title: "Polymarket Activity Checker",
+    href: "https://polymarket-activity-checker-navy.vercel.app/",
+    description:
+      "paste wallet addresses and pull Polymarket volume, pnl, trades, and deposits — with filters and csv export.",
+    image: PolymarketActivityCheckerImage,
+    imageAlt: "Polymarket Activity Checker",
+    technologies: ["HTML", "JavaScript", "Polymarket API"],
+    github: "https://github.com/chesterchong/Polymarket-Activity-Checker",
+    demo: "https://polymarket-activity-checker-navy.vercel.app/",
+  },
   {
     title: "AI Quiz Wrapper",
     href: "https://gamify-ai-learn.vercel.app/",
