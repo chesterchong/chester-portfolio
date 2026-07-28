@@ -1,6 +1,9 @@
+import YouTubeEmbed from "@/app/components/YouTubeEmbed";
+
 export function useMDXComponents(components) {
   return {
     ...components,
+    YouTubeEmbed,
     // Customize code blocks
     pre: ({ children, ...props }) => {
       return (
