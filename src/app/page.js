@@ -108,7 +108,7 @@ export default function About() {
                 ↳
               </span>
               <span className="text-stone-600 dark:text-stone-400">
-                KYC Op
+                KYC Operations
                 <span className="inline-flex items-baseline gap-1 ml-2">
                   <Image
                     src={RadexMarketsLogo}
