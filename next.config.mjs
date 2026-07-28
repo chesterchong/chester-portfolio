@@ -2,6 +2,7 @@ import createMDX from "@next/mdx";
 import rehypePrism from "rehype-prism-plus";
 import remarkToc from "remark-toc";
 import rehypeSlug from "rehype-slug";
+import remarkYoutube from "./src/lib/remark-youtube.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -16,7 +17,8 @@ const withMDX = createMDX({
   // Add markdown plugins here, as desired
   options: {
     remarkPlugins: [
-      [remarkToc, { tight: true, maxDepth: 3 }]
+      [remarkToc, { tight: true, maxDepth: 3 }],
+      remarkYoutube,
     ],
     rehypePlugins: [rehypePrism, rehypeSlug],
   },

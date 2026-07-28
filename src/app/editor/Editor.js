@@ -416,7 +416,7 @@ export default function Editor() {
       </div>
       <p className="text-xs text-stone-500">
         saving commits to GitHub; the site rebuilds automatically (~1 min). markdown is compiled as MDX —
-        avoid stray {"{"} braces {"}"} and unclosed &lt;tags&gt;.
+        avoid stray {"{"} braces {"}"} and unclosed &lt;tags&gt;. paste a YouTube URL on its own line to embed the video.
       </p>
     </div>
   );
