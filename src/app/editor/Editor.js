@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FileText, LogOut, Plus, ArrowLeft, ExternalLink, ImagePlus } from "lucide-react";
+import { FileText, LogOut, Plus, ArrowLeft, ExternalLink, ImagePlus, Trash2 } from "lucide-react";
 
 /*
   Editor mode: writes posts straight to the GitHub repo via the contents
@@ -90,6 +90,8 @@ const inputCls =
   "w-full py-2 px-3 border border-stone-400/60 dark:border-stone-600/60 rounded-md bg-white/25 dark:bg-white/[0.06] backdrop-blur-[2px] text-stone-800 dark:text-stone-200 focus:outline-none focus:border-stone-600 dark:focus:border-stone-400 text-sm";
 const btnCls =
   "py-2 px-4 rounded-md border border-stone-500/50 dark:border-stone-600/60 bg-white/25 dark:bg-white/[0.06] backdrop-blur-[2px] text-stone-700 dark:text-stone-300 hover:bg-white/40 dark:hover:bg-white/10 transition-colors text-sm inline-flex items-center gap-2";
+const dangerBtnCls =
+  "py-2 px-4 rounded-md border border-red-500/40 dark:border-red-500/30 bg-red-500/[0.06] dark:bg-red-500/10 backdrop-blur-[2px] text-red-700 dark:text-red-400 hover:bg-red-500/15 dark:hover:bg-red-500/20 transition-colors text-sm inline-flex items-center gap-2";
 
 export default function Editor() {
   const [token, setToken] = useState(null);
@@ -98,12 +100,16 @@ export default function Editor() {
   const [view, setView] = useState("list"); // list | edit
   const [form, setForm] = useState(null); // { slug, sha, isNew, raw?, title, date, tags, description, body }
   const [status, setStatus] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const bodyRef = useRef(null);
   const fileRef = useRef(null);
+  const confirmTimer = useRef(null);
 
   useEffect(() => {
     setToken(localStorage.getItem("editor-token"));
   }, []);
+
+  useEffect(() => () => clearTimeout(confirmTimer.current), []);
 
   const gh = useCallback(
     async (path, opts = {}) => {
@@ -144,6 +150,7 @@ export default function Editor() {
 
   const openPost = async (slug) => {
     setStatus("loading…");
+    setConfirmDelete(false);
     try {
       const file = await gh(`/contents/${DIR}/${slug}/page.mdx?ref=${BRANCH}`);
       const text = b64decode(file.content);
@@ -161,6 +168,7 @@ export default function Editor() {
   };
 
   const newPost = () => {
+    setConfirmDelete(false);
     setForm({ slug: "", sha: null, isNew: true, title: "", date: today(), tags: "", description: "", body: "" });
     setView("edit");
     setStatus("");
@@ -189,6 +197,51 @@ export default function Editor() {
       loadPosts();
     } catch (e) {
       setStatus(`save failed: ${e.message}`);
+    }
+  };
+
+  const deleteFile = async (path, sha, message) => {
+    await gh(`/contents/${path}`, {
+      method: "DELETE",
+      body: JSON.stringify({ message, sha, branch: BRANCH }),
+    });
+  };
+
+  const deletePost = async () => {
+    if (form.isNew || !form.slug || !form.sha) return;
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      clearTimeout(confirmTimer.current);
+      confirmTimer.current = setTimeout(() => setConfirmDelete(false), 4000);
+      return;
+    }
+    clearTimeout(confirmTimer.current);
+    setConfirmDelete(false);
+    const slug = form.slug;
+    setStatus("deleting…");
+    try {
+      // Remove uploaded images first (best-effort), then the post itself.
+      try {
+        const images = await gh(`/contents/public/images/writing/${slug}?ref=${BRANCH}`);
+        if (Array.isArray(images)) {
+          for (const file of images.filter((e) => e.type === "file")) {
+            await deleteFile(file.path, file.sha, `Delete image for post: ${slug}`);
+          }
+        }
+      } catch (e) {
+        // 404 = no images folder; anything else is still non-fatal for post delete
+        if (!String(e.message).startsWith("404")) {
+          console.warn("image cleanup failed:", e.message);
+        }
+      }
+
+      await deleteFile(`${DIR}/${slug}/page.mdx`, form.sha, `Delete post: ${form.title || slug}`);
+      setForm(null);
+      setView("list");
+      setStatus(`deleted “${slug}” — Vercel is deploying, live in ~1 min`);
+      loadPosts();
+    } catch (e) {
+      setStatus(`delete failed: ${e.message}`);
     }
   };
 
@@ -331,7 +384,13 @@ export default function Editor() {
   return (
     <div className="flex flex-col gap-3 text-sm text-stone-600 dark:text-stone-400">
       <div className="flex justify-between items-center">
-        <button className="inline-flex items-center gap-1 hover:text-stone-800 dark:hover:text-stone-200" onClick={() => setView("list")}>
+        <button
+          className="inline-flex items-center gap-1 hover:text-stone-800 dark:hover:text-stone-200"
+          onClick={() => {
+            setConfirmDelete(false);
+            setView("list");
+          }}
+        >
           <ArrowLeft className="w-4 h-4" /> posts
         </button>
         {!form.isNew && (
@@ -412,6 +471,16 @@ export default function Editor() {
         <button className={btnCls} onClick={() => fileRef.current?.click()}>
           <ImagePlus className="w-4 h-4" /> photo
         </button>
+        {!form.isNew && (
+          <button
+            className={confirmDelete ? dangerBtnCls : btnCls}
+            onClick={deletePost}
+            disabled={status === "deleting…"}
+          >
+            <Trash2 className="w-4 h-4" />
+            {confirmDelete ? "click again to delete" : "delete"}
+          </button>
+        )}
         <span className={status.includes("failed") || status.includes("too large") ? "text-red-600 dark:text-red-400" : ""}>{status}</span>
       </div>
       <p className="text-xs text-stone-500">
