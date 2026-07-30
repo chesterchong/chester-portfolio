@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 const Signature = dynamic(() => import("@/app/components/Signature"), {
   ssr: false,
 });
+import PolymarketLogo from "@/app/components/icon/Polymarket.png";
 import TARUMTLogo from "@/app/components/icon/TARUMT.png";
 import MEXCLogo from "@/app/components/icon/MEXC.png";
 import RadexMarketsLogo from "@/app/components/icon/RadexMarkets.png";
@@ -17,6 +18,24 @@ export default function About() {
   return (
     <div className="flex flex-col w-full font-extralight">
       <ul className="grid gap-1 text-base">
+        <li className="group flex items-start gap-4 pl-4 relative hover:translate-x-1 transition-transform duration-200">
+          <div className="absolute left-0 top-[10px] w-[6px] h-[6px] bg-stone-800 dark:bg-stone-200 rotate-45 transform transition-all duration-300 group-hover:rotate-90 group-hover:scale-110" />
+          <span className="text-stone-600 dark:text-stone-400">
+            Defi
+            <span className="inline-flex items-baseline gap-1 ml-2">
+              <Image
+                src={PolymarketLogo}
+                alt="Polymarket Logo"
+                width={14}
+                height={14}
+                className="object-contain relative top-[2px]"
+              />
+              <Link href="https://polymarket.com" className="font-medium">
+                Polymarket
+              </Link>
+            </span>
+          </span>
+        </li>
         <li className="group flex items-start gap-4 pl-4 relative hover:translate-x-1 transition-transform duration-200">
           <div className="absolute left-0 top-[10px] w-[6px] h-[6px] bg-stone-800 dark:bg-stone-200 rotate-45 transform transition-all duration-300 group-hover:rotate-90 group-hover:scale-110" />
           <span className="text-stone-600 dark:text-stone-400">
